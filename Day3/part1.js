@@ -15,7 +15,7 @@ const wire2 = fs
 
 const intersections = [];
 const intersections2 = [];
-let counter = 0;
+
 const distances1 = {};
 
 //maps the wires with x, y coords in two arrays passed in
@@ -25,7 +25,6 @@ const getCoords = (wire, arrayToFill, distances) => {
   let newX = 0;
   let newY = 0;
   let distance = 1;
-  let counter = 0;
 
   for (let i = 0; i < wire.length; i++) {
     const direction = wire[i].charAt(0);
@@ -35,25 +34,33 @@ const getCoords = (wire, arrayToFill, distances) => {
       case "U":
         for (let i = 0; i < dist; i++) {
           newY = y++;
-          arrayToFill.push({ x, y: newY, steps: counter++ });
+          arrayToFill.push({ x, y: newY });
+          distances[{ x, y: newY }] = distance;
+          distance++;
         }
         break;
       case "D":
         for (let i = 0; i < dist; i++) {
           newY = y--;
-          arrayToFill.push({ x, y: newY, steps: counter++ });
+          arrayToFill.push({ x, y: newY });
+          distances[{ x, y: newY }] = distance;
+          distance++;
         }
         break;
       case "L":
         for (let i = 0; i < dist; i++) {
           newX = x--;
-          arrayToFill.push({ x: newX, y, steps: counter++ });
+          arrayToFill.push({ x: newX, y });
+          distances[{ x: newX, y }] = distance;
+          distance++;
         }
         break;
       case "R":
         for (let i = 0; i < dist; i++) {
           newX = x++;
-          arrayToFill.push({ x: newX, y, steps: counter++ });
+          arrayToFill.push({ x: newX, y });
+          distances[{ x: newX, y }] = distance;
+          distance++;
         }
         break;
       default:
@@ -65,55 +72,18 @@ const getCoords = (wire, arrayToFill, distances) => {
 
 //finds matching elements between two arrays to find crossing sections of wires
 const findIntersections = (wireOne, wireTwo) => {
-  let intersections = [];
-  console.log("WIRE 1: ", wireOne);
-  console.log("WIRE 2: ", wireTwo);
-  wireOne.forEach(function(point) {
-    wireTwo.forEach(function(point2) {
-      if (point.x === point2.x && point.y === point2.y) {
-        console.log("POINT!!!!: ", point);
-        console.log("POINT2!!!!: ", point2);
-
-        point.steps += point2.steps;
-        intersections.push(point);
-      }
-    });
+  return wireOne.filter(coords => {
+    return wireTwo.some(
+      coords2 => coords2.x === coords.x && coords2.y === coords.y
+    );
   });
-  return intersections;
-};
-
-// return wireOne.filter(coords => {
-//     return wireTwo.some(
-//         coords2 => coords2.x === coords.x && coords2.y === coords.y
-//     );
-// });
-
-function getShortestStepCount(intersections) {
-  console.log(intersections);
-  const arrayOfItems = intersections.filter(ind => ind.x !== 0 && ind.y !== 0);
-  console.log(arrayOfItems);
-
-  let steps = arrayOfItems[0].steps;
-  console.log(steps);
-
-  arrayOfItems.forEach(point => {
-    console.log("POINT: ", point);
-    steps = Math.min(steps, point.steps);
-  });
-  return steps;
-}
-
-const part2 = commonVal => {
-  return getShortestStepCount(commonVal);
 };
 
 //make value passed in positive
 const makePos = v => Math.abs(v);
 
 const findManhattanDistance = () => {
-  const arrayOfBothWires = [...intersections, ...intersections2];
   const commonVal = findIntersections(intersections, intersections2);
-
   //makes x and y values positive
   const manDis = commonVal.map(coord => makePos(coord.x) + makePos(coord.y));
 
@@ -122,8 +92,7 @@ const findManhattanDistance = () => {
 
   //returns lowest value
   const finalResult = Math.min(...result);
-  const finalSteps = part2(commonVal);
-  console.log(finalResult, finalSteps);
+  return finalResult;
 };
 
 console.log(getCoords(wire1, intersections, distances1));

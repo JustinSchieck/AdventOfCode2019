@@ -11,6 +11,7 @@ const range = { min: 138241, max: 674034 };
 
 let password1 = 0;
 let passwords2 = 0;
+let counter = 0;
 
 const FindNumberOfPasscode = input => {
   const Chars = input
@@ -24,7 +25,10 @@ const FindNumberOfPasscode = input => {
       return false;
     }
   }
-
+  // Check for ONLY a single pair
+  if (input.toString().match(/(?:^|(.)(?!\1))(\d)\2(?!\2)/)) {
+    return true;
+  }
   // Check pairs
   for (let i = 1; i < Chars.length; i++) {
     if (Chars[i] === Chars[i - 1]) {
