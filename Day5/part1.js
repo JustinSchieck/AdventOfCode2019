@@ -5,44 +5,94 @@ const inputStr = fs
   .split(",")
   .map(Number);
 
-const IntCodeAlarm = (r1, r2) => {
-  const value = inputStr.slice();
+// const inputStr = fs
+//   .readFileSync("inputday2.txt", "UTF-8")
+//   .split(",")
+//   .map(Number);
 
-  //replacements set from 12 and 2
-  value[1] = r1;
-  value[2] = r2;
+const IntCodeAlarm = input => {
+  let value = inputStr;
+  let stop = false;
+  for (let i = 0; i < value.length && !stop; ) {
+    const instruction = value.slice(i, i + 4);
+    const opcode = instruction[0] % 100;
+    const mode = instruction[0].toString().padStart(5, "0");
 
-  let startPos = 0;
-
-  while (value[startPos] !== 99) {
-    const xIdx = value[startPos + 1];
-    const yIdx = value[startPos + 2];
-    const x = value[xIdx];
-    const y = value[yIdx];
-
-    const outputInd = value[startPos + 3];
-    //calc
-    const output = value[startPos] === 1 ? x + y : x * y;
-
-    value[outputInd] = output;
-    startPos += 4;
+    const getValue = index => {
+      //checks if position mode if value of index is 0 loosely
+      const posMode = mode[3 - index] == "0";
+      // this is for a number that is 000opcode, removes the leading 0 and gets the remaining code
+      if (posMode) {
+        return value[instruction[index]];
+      } else {
+        return instruction[index];
+      }
+    };
+    switch (opcode) {
+      case 1:
+        value[instruction[3]] = getValue(1) + getValue(2);
+        //set new start value
+        i += 4;
+        break;
+      case 2:
+        value[instruction[3]] = getValue(1) * getValue(2);
+        //set new start value
+        i += 4;
+        break;
+      case 3:
+        //removes first element from array and returns it to the value[1]
+        value[instruction[1]] = input.shift();
+        //set new start value
+        i += 2;
+        break;
+      case 4:
+        //set new start value
+        console.log(getValue(1));
+        i += 2;
+        break;
+      //Test system below!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      case 5: // jump-if-true
+        if (getValue(1) != 0) {
+          i = getValue(2);
+        } else {
+          i += 3;
+        }
+        break;
+      case 6: // jump-if-false
+        if (getValue(1) == 0) {
+          i = getValue(2);
+        } else {
+          i += 3;
+        }
+        break;
+      case 7: //less than
+        if (getValue(1) < getValue(2)) {
+          value[instruction[3]] = 1;
+        } else {
+          value[instruction[3]] = 0;
+        }
+        i += 4;
+        break;
+      case 8: // equals to
+        if (getValue(1) == getValue(2)) {
+          value[instruction[3]] = 1;
+        } else {
+          value[instruction[3]] = 0;
+        }
+        i += 4;
+        break;
+      case 99:
+        stop = true;
+        break;
+      default:
+        stop = true;
+        console.log("Failure Wrong code at pos: ", i, ":", instruction[0]);
+        break;
+    }
   }
-
   return value[0];
 };
 
-console.log(IntCodeAlarm(12, 2));
+const input = [5];
 
-const NounVerb = wantedValue => {
-  for (let n = 0; n < 100; n++) {
-    for (let v = 0; v < 100; v++) {
-      const final = IntCodeAlarm(n, v);
-
-      if (final === wantedValue) {
-        return 100 * n + v;
-      }
-    }
-  }
-};
-
-console.log(NounVerb(19690720));
+console.log(IntCodeAlarm(input));

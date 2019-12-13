@@ -22,13 +22,7 @@ const IntCodeAlarm = (r1, r2) => {
 
     const outputInd = value[startPos + 3];
     //calc
-    let output = 0;
-    
-    if(value[startPos] === 1 ){
-      output = x + y;
-    }else if (value[startPos] === 2){
-      output = x * y;
-    }
+    const output = value[startPos] === 1 ? x + y : x * y;
 
     value[outputInd] = output;
     startPos += 4;
